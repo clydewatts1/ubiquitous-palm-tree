@@ -1,0 +1,21 @@
+# Teradata Environment Configuration Template
+# Copy this file to td_env.yaml and fill in your credentials
+# DO NOT commit td_env.yaml to git (it's in .gitignore)
+
+test:
+  host: "test-teradata-server.company.com"
+  username: "your_username"
+  password: "your_password"
+  database: "test_database"
+  logmech: "TD2"  # TD2, LDAP, etc.
+  tmode: "ANSI"  # ANSI or TERA
+  charset: "UTF8"
+
+prod:
+  host: "prod-teradata-server.company.com"
+  username: "your_username"
+  password: "your_password"
+  database: "prod_database"
+  logmech: "TD2"
+  tmode: "ANSI"
+  charset: "UTF8"
