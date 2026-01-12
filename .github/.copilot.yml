@@ -1,0 +1,55 @@
+# GitHub Copilot Configuration
+# This file provides configuration for GitHub Copilot in the workspace
+
+# Ignored files and directories
+# Copilot will not provide suggestions for these patterns
+ignore:
+  - "*.min.js"
+  - "*.min.css"
+  - "node_modules/**"
+  - ".venv/**"
+  - "venv/**"
+  - "dist/**"
+  - "build/**"
+  - "*.egg-info/**"
+  - "__pycache__/**"
+  - ".pytest_cache/**"
+  - ".mypy_cache/**"
+  - "coverage/**"
+  - "htmlcov/**"
+
+# Language-specific settings
+languages:
+  python:
+    # Prefer type hints
+    prefer_type_hints: true
+    # Follow PEP 8
+    style_guide: "pep8"
+    # Target Python version
+    version: "3.11"
+    # Preferred testing framework
+    test_framework: "pytest"
+    # Preferred documentation style
+    docstring_style: "google"
+
+# Project-specific context
+project:
+  type: "library"
+  domain: "database,analytics,reporting"
+  frameworks:
+    - "pandas"
+    - "sqlalchemy"
+    - "teradata"
+
+# Preferences
+preferences:
+  # Prefer explicit over implicit
+  explicit_over_implicit: true
+  # Prefer composition over inheritance
+  composition_over_inheritance: true
+  # Prefer functional patterns where appropriate
+  functional_style: false
+  # Include type hints in suggestions
+  include_type_hints: true
+  # Include docstrings in suggestions
+  include_docstrings: true
