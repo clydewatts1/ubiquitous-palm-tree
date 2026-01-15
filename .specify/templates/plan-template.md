@@ -31,7 +31,15 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify compliance with Constitution v1.0.0 principles:
+
+- [ ] **I. Library-First Architecture**: Feature implemented in modular `src/` libraries with clear interfaces
+- [ ] **II. Type Safety & Documentation**: All public functions have type hints and Google-style docstrings
+- [ ] **III. Database Connection Management**: Connections use context managers, proper pooling, error handling
+- [ ] **IV. Testing Standards**: Unit tests (>80% coverage) and integration tests planned
+- [ ] **V. Code Quality**: Black, Flake8, Mypy, pre-commit hooks configured and passing
+- [ ] **VI. Data Processing**: Pandas best practices followed (vectorization, explicit missing data handling)
+- [ ] **VII. Security**: No credentials in code; environment variables or template files used
 
 ## Project Structure
 

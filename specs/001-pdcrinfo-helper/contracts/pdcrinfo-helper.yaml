@@ -1,0 +1,91 @@
+openapi: 3.0.3
+info:
+  title: PDCRINFO Helper Library Contract
+  version: 1.0.0
+  description: Library contract expressed as REST shape for clarity; maps to helper function parameters/return values.
+paths:
+  /pdcrinfo/{table}:
+    get:
+      summary: Fetch PDCRINFO maintenance table rows into a tabular dataset
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/PDCRTable'
+        - name: env
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Environment key from td_env.yaml
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Inclusive start date (default 1900-01-01)
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Inclusive end date (default yesterday)
+        - name: database_pattern
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Database name pattern; if no wildcards provided, helper wraps with %...
+      responses:
+        '200':
+          description: Tabular dataset rows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultDataset'
+        '400':
+          description: Validation error (unsupported table, bad date range, missing env)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Query execution failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    PDCRTable:
+      type: string
+      enum:
+        - TableSpace_Hst
+        - DatabaseSpace_Hst
+    ResultDataset:
+      type: object
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+      required:
+        - columns
+        - rows
+      description: Logical shape of the returned DataFrame (column order preserved from source).
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        details:
+          type: string
+      required:
+        - message
