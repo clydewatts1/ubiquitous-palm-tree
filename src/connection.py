@@ -100,27 +100,44 @@ class TeradataConnection:
         config = self._config[env_name]
 
         # Required parameters
-        required = ["host", "username", "password", "database"]
+        logmech = config.get("logmech", "TD2")
+        logmech_value = str(logmech).upper()
+        browser_auth = logmech_value == "BROWSER"
+
+        required = ["host", "database"]
+        if not browser_auth:
+            required.extend(["username", "password"])
         missing = [param for param in required if param not in config]
         if missing:
             raise TeradataConnectionError(
                 f"Missing required parameters for '{env_name}': {missing}"
             )
 
-        # Build connection string
         host = config["host"]
-        username = config["username"]
-        password = config["password"]
         database = config["database"]
+        username = config.get("username")
+        password = config.get("password")
 
-        # Optional parameters
-        logmech = config.get("logmech", "TD2")
+        if browser_auth and password and not username:
+            raise TeradataConnectionError(
+                f"Username required when password provided for '{env_name}' "
+                "with logmech=BROWSER"
+            )
 
+        if browser_auth:
+            if username:
+                auth_segment = f"{username}"
+                if password:
+                    auth_segment += f":{password}"
+                auth_segment += "@"
+            else:
+                auth_segment = "@"
+        else:
+            auth_segment = f"{username}:{password}@"
         conn_string = (
-            f"teradatasql://{username}:{password}@{host}/"
-            f"{database}?LOGMECH={logmech}"
-        )
-
+                f"teradatasql://{auth_segment}{host}/{database}?logmech={logmech_value}"
+            )
+        logger.info(f"Connection string: {conn_string}")
         # Add optional parameters
         if "tmode" in config:
             conn_string += f"&TMODE={config['tmode']}"
@@ -145,12 +162,13 @@ class TeradataConnection:
         if env_name not in self._engines:
             try:
                 conn_string = self._build_connection_string(env_name)
-
+                print("Connection string:", conn_string)
                 engine = create_engine(
                     conn_string,
                     pool_size=pool_size,
                     pool_pre_ping=True,  # Verify connections before using
-                    echo=False,
+                    #echo=False,
+                    echo=True,  # Enable SQL query logging
                 )
 
                 # Test connection
