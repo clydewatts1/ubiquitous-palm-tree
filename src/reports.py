@@ -201,6 +201,70 @@ class PDCRInfoReport:
             logger.debug(f"Query parameters: {params}")
             return pd.read_sql(sql_text, engine, params=params)
 
+    def get_spoolspace_history(
+        self,
+        env_name: str,
+        start_date: Optional[DateLike] = None,
+        end_date: Optional[DateLike] = None,
+        user_name: str = "%",
+        account_name: str = "%",
+    ) -> pd.DataFrame:
+        """Retrieve SpoolSpace history from PDCRINFO.SpoolSpace_Hst.
+
+        Args:
+            env_name: Environment name (e.g., 'test', 'prod').
+            start_date: Inclusive start date; defaults to 1900-01-01 when None.
+            end_date: Inclusive end date; defaults to yesterday when None.
+            user_name: User name pattern; '%' by default.
+            account_name: Account name pattern; '%' by default.
+
+
+        Returns:
+            DataFrame with LogDate, UserName, AccountName, CURRENTSPOOL,
+            PEAKSPOOL, MAXSPOOL, CURRENTSPOOLSKEW.
+
+        Example:
+            >>> report = PDCRInfoReport()
+            >>> df = report.get_spoolspace_history('prod', user_name='Sales%')
+        """
+
+        start_value, end_value = self._normalize_dates(start_date, end_date)
+        user_filter = self._database_filter(user_name)
+        account_filter = self._database_filter(account_name)
+
+        query = """
+        SELECT
+            LogDate, UserName, AccountName, CURRENTSPOOL, PEAKSPOOL,
+		MAXSPOOL, PEAKSPOOLSKEW, CURRENTTEMP, PEAKTEMP, MAXTEMP, PEAKTEMPSKEW
+        FROM PDCRINFO.SpoolSpace_Hst
+        WHERE Logdate BETWEEN :start_date AND :end_date
+          AND TRIM(UserName) LIKE :user_name
+          AND TRIM(AccountName) LIKE :account_name
+        ORDER BY 1, 2, 3;
+        """
+
+        logger.info(
+            "Query Text: %s", query
+        )
+
+        logger.info(
+            "Fetching SpoolSpace history for %s between %s and %s",
+            env_name,
+            start_value,
+            end_value,
+        )
+
+        with self.conn_mgr.get_connection(env_name) as engine:
+            sql_text = text(query)
+            params = {
+                "start_date": start_value,
+                "end_date": end_value,
+                "user_name": user_filter,
+                "account_name": account_filter,
+            }
+            logger.debug(f"Query parameters: {params}")
+            return pd.read_sql(sql_text, engine, params=params)
+
     def get_dbcinfo(self, env_name: str) -> pd.DataFrame:
         """Retrieve PDCR info data from DBC.DBCInfoV.
 
