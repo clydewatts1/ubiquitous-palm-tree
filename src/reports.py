@@ -5,6 +5,7 @@ Teradata PDCR (Performance Data Collection and Reporting) data.
 """
 
 import logging
+import time
 from datetime import date, timedelta
 from typing import Optional, Union
 
@@ -134,7 +135,32 @@ class PDCRInfoReport:
                 "database_name": db_filter,
             }
             logger.debug(f"Query parameters: {params}")
-            return pd.read_sql(sql_text, engine, params=params)
+            start_ts = time.perf_counter()
+            try:
+                df = pd.read_sql(sql_text, engine, params=params)
+            except Exception as exc:  # pragma: no cover - safety net
+                logger.error(
+                    "Failed TableSpace query env=%s start=%s end=%s filter=%s error=%s",
+                    env_name,
+                    start_value,
+                    end_value,
+                    db_filter,
+                    exc,
+                )
+                raise
+
+            duration = time.perf_counter() - start_ts
+            if duration > 5:
+                logger.warning(
+                    "Slow TableSpace query env=%s duration=%.3fs", env_name, duration
+                )
+            else:
+                logger.debug(
+                    "TableSpace query duration env=%s duration=%.3fs",
+                    env_name,
+                    duration,
+                )
+            return df
 
     def get_databasespace_history(
         self,
@@ -199,7 +225,32 @@ class PDCRInfoReport:
                 "database_name": db_filter,
             }
             logger.debug(f"Query parameters: {params}")
-            return pd.read_sql(sql_text, engine, params=params)
+            start_ts = time.perf_counter()
+            try:
+                df = pd.read_sql(sql_text, engine, params=params)
+            except Exception as exc:  # pragma: no cover - safety net
+                logger.error(
+                    "Failed DatabaseSpace query env=%s start=%s end=%s filter=%s error=%s",
+                    env_name,
+                    start_value,
+                    end_value,
+                    db_filter,
+                    exc,
+                )
+                raise
+
+            duration = time.perf_counter() - start_ts
+            if duration > 5:
+                logger.warning(
+                    "Slow DatabaseSpace query env=%s duration=%.3fs", env_name, duration
+                )
+            else:
+                logger.debug(
+                    "DatabaseSpace query duration env=%s duration=%.3fs",
+                    env_name,
+                    duration,
+                )
+            return df
 
     def get_spoolspace_history(
         self,
@@ -263,7 +314,33 @@ class PDCRInfoReport:
                 "account_name": account_filter,
             }
             logger.debug(f"Query parameters: {params}")
-            return pd.read_sql(sql_text, engine, params=params)
+            start_ts = time.perf_counter()
+            try:
+                df = pd.read_sql(sql_text, engine, params=params)
+            except Exception as exc:  # pragma: no cover - safety net
+                logger.error(
+                    "Failed SpoolSpace query env=%s start=%s end=%s user=%s account=%s error=%s",
+                    env_name,
+                    start_value,
+                    end_value,
+                    user_filter,
+                    account_filter,
+                    exc,
+                )
+                raise
+
+            duration = time.perf_counter() - start_ts
+            if duration > 5:
+                logger.warning(
+                    "Slow SpoolSpace query env=%s duration=%.3fs", env_name, duration
+                )
+            else:
+                logger.debug(
+                    "SpoolSpace query duration env=%s duration=%.3fs",
+                    env_name,
+                    duration,
+                )
+            return df
 
     def get_DBQLSummaryTable_History(
         self,
@@ -331,7 +408,32 @@ class PDCRInfoReport:
                 "user_name": user_filter,
             }
             logger.debug(f"Query parameters: {params}")
-            return pd.read_sql(sql_text, engine, params=params)
+            start_ts = time.perf_counter()
+            try:
+                df = pd.read_sql(sql_text, engine, params=params)
+            except Exception as exc:  # pragma: no cover - safety net
+                logger.error(
+                    "Failed DBQL Summary query env=%s start=%s end=%s user=%s error=%s",
+                    env_name,
+                    start_value,
+                    end_value,
+                    user_filter,
+                    exc,
+                )
+                raise
+
+            duration = time.perf_counter() - start_ts
+            if duration > 5:
+                logger.warning(
+                    "Slow DBQL Summary query env=%s duration=%.3fs", env_name, duration
+                )
+            else:
+                logger.debug(
+                    "DBQL Summary query duration env=%s duration=%.3fs",
+                    env_name,
+                    duration,
+                )
+            return df
 
     def get_dbcinfo(self, env_name: str) -> pd.DataFrame:
         """Retrieve PDCR info data from DBC.DBCInfoV.
